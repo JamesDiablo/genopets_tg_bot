@@ -61,24 +61,6 @@ async def get_stats(message):
             habitat_list_count = resp.json()['magicEdenListedCount']
             habitat_volume = resp.json()['magicEdenVolume']
 
-            # ki and gene
-            headers = {
-                'accept': 'application/json, text/plain, */*',
-                'accept-language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7',
-                'agent-id': '786e1f01-223b-4519-8ae1-9f2b818c50f4',
-                'content-type': 'application/json; charset=utf-8',
-                'origin': 'https://birdeye.so',
-                'sec-ch-ua-platform': "Linux",
-                'cf-be': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NjAyODExNjYsImV4cCI6MTY2MDI4MTQ2Nn0.W33Ohsde2qj2R8Cmt48bFai3adAcMxIyKNSNQ76P7zU',
-                'referer': 'https://birdeye.so/',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36 Edg/104.0.1293.54'
-            }
-            # resp = r.get("https://api.birdeye.so/overview/token?address=kiGenopAScF8VF31Zbtx2Hg8qA5ArGqvnVtXb83sotc", headers=headers)
-            # ki = resp.json()['data']['price']
-
-            # resp = r.get("https://api.birdeye.so/overview/token?address=GENEtH5amGSi8kHAtQoezp1XEXwZJ8vcuePYnXdKrMYz", headers=headers)
-            # gene = resp.json()['data']['price']
-
             for data in BotDB.get_token_price():
                 sol = float(data[0])
                 ki = float(data[1])
