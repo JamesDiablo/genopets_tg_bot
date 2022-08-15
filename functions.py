@@ -1,8 +1,9 @@
 from menu import create_menu
-from config import bot, BotDB
+from config import BotDB
 import requests as r
 from pycoingecko import CoinGeckoAPI
 from time import sleep
+import traceback
 
 cg = CoinGeckoAPI()
 
@@ -19,7 +20,12 @@ async def get_stats(message):
     attempt = 0
     except_rto = 0
     while attempt < 3:
-        try:   
+        try:
+            # token price
+            for data in BotDB.get_token_price():
+                sol = float(data[0])
+                ki = float(data[1])
+                gene = float(data[2])
             # количество созданных земель
             if except_rto == 0:
                 resp = r.get('https://api.solscan.io/account/tokens?address=BKMgh6yy27uVZQJxtNYQADv3P1sm93PC1MvpUTAX9ktP', timeout=4)
@@ -37,8 +43,15 @@ async def get_stats(message):
             for x in range(3):
                 floor_lands.append(resp.json()['result'][x]['listingPrice'])
             resp = r.get("https://jpn698dhc9.execute-api.us-east-1.amazonaws.com/prod/v1/floorTraits?collection=genesis_genopets_habitats", headers=headers)
-            lvl2_floor = resp.json()['Level']['2']['floorPrice']
-            lvl3_floor = resp.json()['Level']['3']['floorPrice']
+            
+            if '2' in resp.json()['Level']:
+                lvl2_floor = resp.json()['Level']['2']['floorPrice']
+                format_str_lvl2 = f'{lvl2_floor}* SOL *({round(lvl2_floor*sol,2)}$)'
+            else: format_str_lvl2 = 'Отсутствует'
+            if '3' in resp.json()['Level']:
+                lvl3_floor = resp.json()['Level']['3']['floorPrice']
+                format_str_lvl3 = f'{lvl3_floor}* SOL *({round(lvl3_floor*sol,2)}$)'
+            else: format_str_lvl3 = 'Отсутсвует'
 
             # crystals nft
             resp = r.get("https://jpn698dhc9.execute-api.us-east-1.amazonaws.com/prod/v1/floorTraits?collection=genopets_refined_genotype_crystals", headers=headers)
@@ -61,25 +74,21 @@ async def get_stats(message):
             habitat_list_count = resp.json()['magicEdenListedCount']
             habitat_volume = resp.json()['magicEdenVolume']
 
-            for data in BotDB.get_token_price():
-                sol = float(data[0])
-                ki = float(data[1])
-                gene = float(data[2])
             floor_genopets = str(floor_genopets).replace('[','',1).replace(']','',1)
             floor_lands = str(floor_lands).replace('[','',1).replace(']','',1)
             break
         except r.exceptions.ReadTimeout as ex:
             except_rto = 1
             print(ex)
-        except Exception as ex:
-            print(ex)
+        except Exception:
+            print(traceback.format_exc())
             attempt += 1
             sleep(1)
-    # loading_message["message_id"]
+    
     return await loading_message.edit_text(
         f'\U0001f3d4\uFE0F *Genesis Habitat*\
         \n3 самые дешевые земли на ME: *{floor_lands}* SOL | *({round(sol_floor_lands * sol, 1)}$)*\
-        \nLevel 2: *{lvl2_floor}* SOL *({round(lvl2_floor*sol,2)}$)* | Level 3: *{lvl3_floor}* SOL *({round(lvl3_floor*sol,2)}$)*\n\
+        \nLevel 2: *{format_str_lvl2}* | Level 3: *{format_str_lvl3}*\n\
         \n\U0001f5fb *Habitat*\
         \nMagicEden Floor: *{habitat_floor}* SOL *({round(float(habitat_floor)*sol, 2)}$)*\
         \nВыставлено на продажу: *{habitat_list_count}*\

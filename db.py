@@ -1,6 +1,4 @@
 import sqlite3
-from decimal import Decimal
-from time import time
 
 class BotDB:
 
